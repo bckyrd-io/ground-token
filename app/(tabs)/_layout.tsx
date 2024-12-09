@@ -34,14 +34,21 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="onboard"
+        name="overview"
         options={{
-          title: 'On Board',
+          title: 'Locate',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="activity-list"
+        options={{
+          title: 'PlayGround',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="dashboar"
+        name="dashboard"
         options={{
           title: 'DashBoard',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
