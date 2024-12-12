@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, CheckBox } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 
 type RegistrationData = {
@@ -87,19 +87,19 @@ export default function RegisterScreen() {
                 onChangeText={(text) => handleChange('address', text)}
             />
 
-            <View style={styles.checkboxContainer}>
-                <CheckBox
+            <View style={styles.switchContainer}>
+                <Switch
                     value={formData.agreeToTerms}
                     onValueChange={(value) => handleChange('agreeToTerms', value)}
                 />
-                <Text style={styles.checkboxLabel}>
+                <Text style={styles.switchLabel}>
                     I agree to Terms and Conditions
                 </Text>
             </View>
 
             <Button title="Register" onPress={handleRegister} />
 
-            <Text style={styles.link} onPress={() => router.push('/login')}>
+            <Text style={styles.link} onPress={() => router.push('/')}>
                 Back to Login
             </Text>
         </View>
@@ -126,13 +126,14 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderRadius: 8,
     },
-    checkboxContainer: {
+    switchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 16,
     },
-    checkboxLabel: {
+    switchLabel: {
         marginLeft: 8,
+        fontSize: 16,
     },
     link: {
         color: '#007BFF',
