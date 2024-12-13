@@ -72,6 +72,14 @@ The app uses mock JSON data to populate initial playground entries and dashboard
 1. Scroll through the list of playgrounds.
 2. Tap the **Delete** button on the entry you want to remove.
 
+
+##User Scenario:
+```bash
+A user downloads the Playgrounds Management App to explore nearby playgrounds. After launching the app, they quickly locate the Playgrounds section and browse through the list of available options. They find a playground close to their home, check its details, and note the coordinates to visit later. Impressed by the clean design and ease of navigation, they decide to recommend the app to friends who also enjoy family outings.
+
+An admin logs into the app to manage playground listings. In the Admin Dashboard, they review key metrics like the number of users and weekly activity. They then navigate to the Playground Management section to update information about a playground, including its description and GPS coordinates. After ensuring the details are accurate, they add a new entry for a recently developed playground and delete an obsolete one, all within minutes. 
+```
+
 ## Screenshots
 ![Dashboard Screenshot](#)
 ![Add Playground Form](#)
