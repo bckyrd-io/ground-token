@@ -1,50 +1,100 @@
-# Welcome to your Expo app 👋
+# Ground Token (for playgrounds)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This app allows administrators to manage playgrounds and their locations. Users can view, add, and delete playgrounds with GPS location integration. It's built using React Native and integrates mock JSON data for demonstration purposes.
 
-## Get started
+## Features
 
-1. Install dependencies
+### Admin Dashboard
+- Displays weekly usage statistics with a bar chart.
+- Summary cards for key metrics (e.g., total users, active users).
+- Recent activity logs with timestamps.
+- Management buttons to navigate to user and playground management screens.
 
+### Playground Management
+- Add playgrounds with:
+  - Name
+  - Description
+  - GPS location fetched from the device.
+- List all playgrounds with their details:
+  - Name
+  - Description
+  - Latitude and Longitude.
+- Delete playgrounds directly from the list.
+- Mock JSON data is preloaded to simulate playground entries.
+
+## Screens
+
+### Admin Dashboard
+- **Summary Cards:** Quick insights into users and revenue.
+- **Weekly Usage Graph:** Visual representation of user activity.
+- **Recent Activities:** Log of actions taken by users or admins.
+
+### Admin Playgrounds
+- **Form to Add Playgrounds:** Input fields for name, description, and a button to fetch GPS location.
+- **Playground List:** Displays all added playgrounds with a delete button for each.
+
+## Technologies Used
+- **React Native:** Framework for building native mobile apps using JavaScript.
+- **Expo Location:** Fetches the GPS location of the device.
+- **React Native Chart Kit:** Displays bar charts.
+
+## Installation
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/your-repo-url
+   cd ground-token
+   ```
+2. Install dependencies:
    ```bash
    npm install
    ```
-
-2. Start the app
-
+3. Start the development server:
    ```bash
-    npx expo start
+   npm start
    ```
+4. Open the app on your device using the Expo Go app or an emulator.
 
-In the output, you'll find options to open the app in a
+## Mock Data
+The app uses mock JSON data to populate initial playground entries and dashboard metrics.
+- **Playgrounds:** Predefined entries with name, description, and GPS coordinates.
+- **Dashboard Metrics:** Weekly usage data and summary cards.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Usage
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Adding a Playground
+1. Navigate to the **Admin Playgrounds** screen.
+2. Fill in the playground name and description.
+3. Fetch the current GPS location by tapping the **Get GPS Location** button.
+4. Tap **Add Playground** to save.
 
-## Get a fresh project
+### Deleting a Playground
+1. Scroll through the list of playgrounds.
+2. Tap the **Delete** button on the entry you want to remove.
 
-When you're ready, run:
+## Screenshots
+![Dashboard Screenshot](#)
+![Add Playground Form](#)
 
-```bash
-npm run reset-project
-```
+## Contributing
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+1. Fork the repository.
+2. Create a new branch for your feature:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Commit your changes:
+   ```bash
+   git commit -m "Description of changes"
+   ```
+4. Push to the branch:
+   ```bash
+   git push origin feature-name
+   ```
+5. Open a pull request.
 
-## Learn more
+## License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Contact
+For questions or suggestions, please reach out to [your email or GitHub profile].
