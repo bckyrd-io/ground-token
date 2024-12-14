@@ -1,19 +1,38 @@
 import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useRouter } from 'expo-router';
 
-export default function LoginScreen({ navigation }: { navigation: any }) {
+export default function IndexScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <TextInput style={styles.input} placeholder="Email/Username" />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry />
-      <Button title="Login" onPress={() => navigation.navigate('Dashboard')} />
-      <Text style={styles.link} onPress={() => navigation.navigate('Register')}>
-        Create an Account
+      <Text style={styles.title}>Welcome To Ground Token</Text>
+      <Text style={styles.subtitle}>
+        Discover amazing play locations and activities near you!
       </Text>
-      <Text style={styles.link} onPress={() => navigation.navigate('PasswordRecovery')}>
-        Forgot Password?
-      </Text>
+
+      {/* Optional: Add an image or carousel to showcase features */}
+      <Image
+        source={{ uri: 'https://picsum.photos/id/69/200/300' }}
+        style={styles.image}
+      />
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/LoginScreen')}
+      >
+        <Text style={styles.buttonText}>Log In</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.secondaryButton]}
+        onPress={() => router.push('/RegisterScreen')}
+      >
+        <Text style={[styles.buttonText, styles.secondaryButtonText]}>
+          Sign Up
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -24,23 +43,45 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
+    backgroundColor: '#f9f9f9',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  input: {
-    width: '98%',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    color: '#4CAF50',
     marginBottom: 12,
-    borderRadius: 8,
   },
-  link: {
-    color: '#007BFF',
-    marginTop: 12,
-    textDecorationLine: 'underline',
+  subtitle: {
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    marginBottom: 32,
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+    width: '100%',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#4CAF50',
+  },
+  secondaryButtonText: {
+    color: '#4CAF50',
   },
 });

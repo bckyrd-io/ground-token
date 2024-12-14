@@ -17,133 +17,144 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: activeTintColor, // Set the active color to green
-                headerShown: false,
+                headerShown: true,
                 tabBarButton: HapticTab,
                 tabBarBackground: TabBarBackground,
                 tabBarStyle: Platform.select({
                     ios: {
-                        // Use a transparent background on iOS to show the blur effect
-                        position: 'absolute',
+                        position: 'absolute', // Use a transparent background on iOS to show the blur effect
                     },
                     default: {},
                 }),
+                tabBarActiveTintColor: activeTintColor, // Set active tint color for icons
             }}
         >
+            {/* Home Tab (Always visible) */}
             <Tabs.Screen
                 name="index"
                 options={{
                     title: 'Home',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="home" size={28} color={color} /> // "home" icon
+                        <Ionicons name="home" size={28} color={color} />
                     ),
                 }}
             />
+
+            {/* Login Tab (Only show when not logged in) */}
             <Tabs.Screen
-                name="locate"
-                options={{
-                    title: 'Locate',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="map" size={28} color={color} /> // "map" icon
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="playground"
-                options={{
-                    title: 'Playground',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="basketball" size={28} color={color} /> // "basketball" icon
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="dashboard"
-                options={{
-                    title: 'Dashboard',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="stats-chart" size={28} color={color} /> // "stats-chart" icon
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="status"
-                options={{
-                    title: 'Status',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="document-text" size={28} color={color} /> // "document-text" icon
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="adminUsers"
-                options={{
-                    title: 'Admin Users',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="person" size={28} color={color} /> // "person" icon for user management
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="adminPlayground"
-                options={{
-                    title: 'Admin Playground',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="game-controller" size={28} color={color} /> // "game-controller" icon for playground admin
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="login"
+                name="LoginScreen"
                 options={{
                     title: 'Login',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="log-in" size={28} color={color} /> // "log-in" icon for login
+                        <Ionicons name="log-in" size={28} color={color} />
                     ),
                 }}
             />
+
+            {/* Register Tab (Only show when not logged in) */}
             <Tabs.Screen
-                name="admin"
-                options={{
-                    title: 'Admin',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="shield-checkmark" size={28} color={color} /> // "shield-checkmark" icon for admin
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="payment"
-                options={{
-                    title: 'Payment',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="card" size={28} color={color} /> // "card" icon for payment
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="overview"
-                options={{
-                    title: 'Overview',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="eye" size={28} color={color} /> // "eye" icon for overview
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="register"
+                name="RegisterScreen"
                 options={{
                     title: 'Register',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="person-add" size={28} color={color} /> // "person-add" icon for registration
+                        <Ionicons name="person-add" size={28} color={color} />
                     ),
                 }}
             />
+
+            {/* Password Recovery Tab (Always visible) */}
             <Tabs.Screen
-                name="passwordRecovery"
+                name="RecoveryScreen"
                 options={{
                     title: 'Password Recovery',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="key" size={28} color={color} /> // "key" icon for password recovery
+                        <Ionicons name="key" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            {/* Map Tab (Always visible) */}
+            <Tabs.Screen
+                name="MapScreen"
+                options={{
+                    title: 'Locate',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="location" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            {/* Playground Tab (Always visible) */}
+            <Tabs.Screen
+                name="PlaygroundScreen"
+                options={{
+                    title: 'Playground',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="basketball" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            {/* Dashboard Tab (Always visible) */}
+            <Tabs.Screen
+                name="DashboardScreen"
+                options={{
+                    title: 'Dashboard',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="stats-chart" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            {/* Status Tab (Always visible) */}
+            <Tabs.Screen
+                name="StatusScreen"
+                options={{
+                    title: 'Status',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="document-text" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            {/* Payment Tab (Always visible) */}
+            <Tabs.Screen
+                name="PaymentScreen"
+                options={{
+                    title: 'Payment',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="card" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            {/* Admin Tabs (Always visible) */}
+            <Tabs.Screen
+                name="adminScreen"
+                options={{
+                    title: 'Admin',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="shield-checkmark" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            <Tabs.Screen
+                name="AdminUsersScreen"
+                options={{
+                    title: 'Admin Users',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="person" size={28} color={color} />
+                    ),
+                }}
+            />
+
+            <Tabs.Screen
+                name="adminPlaygroundScreen"
+                options={{
+                    title: 'Admin Playground',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="game-controller" size={28} color={color} />
                     ),
                 }}
             />

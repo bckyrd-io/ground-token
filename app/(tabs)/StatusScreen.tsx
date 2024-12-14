@@ -66,7 +66,7 @@ export default function StatusScreen(): JSX.Element {
         )}
         contentContainerStyle={styles.statusList}
       />
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/playground')}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/PlaygroundScreen')}>
         <Text style={styles.backButtonText}>Go Back to Playground</Text>
       </TouchableOpacity>
     </View>

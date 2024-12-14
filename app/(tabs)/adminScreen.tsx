@@ -50,8 +50,6 @@ export default function AdminDashboard(): JSX.Element {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Admin Dashboard</Text>
-
       {/* Summary Cards */}
       <View style={styles.summaryContainer}>
         {summaryData.map((item) => (
@@ -106,15 +104,6 @@ export default function AdminDashboard(): JSX.Element {
         />
       </View>
 
-      {/* Manage Buttons */}
-      <View style={styles.manageContainer}>
-        <TouchableOpacity style={styles.manageButton}>
-          <Text style={styles.manageButtonText}>Manage Users</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.manageButton}>
-          <Text style={styles.manageButtonText}>Manage Playgrounds</Text>
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 }
@@ -136,6 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
+    marginTop: 20,
   },
   summaryCard: {
     flex: 1,
@@ -192,22 +182,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     color: '#757575',
-  },
-  manageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  manageButton: {
-    flex: 1,
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginHorizontal: 5,
-  },
-  manageButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
