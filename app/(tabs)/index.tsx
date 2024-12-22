@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
   secondaryButton: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#4CAF50',
+    borderColor: '#FFC107',
   },
   secondaryButtonText: {
-    color: '#4CAF50',
+    color: '#FFC107',
   },
 });

@@ -118,7 +118,6 @@ export default function AdminPlayground(): JSX.Element {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Manage Playgrounds</Text>
 
       {/* Add Playground Form */}
       <View style={styles.formContainer}>
@@ -213,7 +212,7 @@ const styles = StyleSheet.create({
     color: '#424242',
   },
   addButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#FFC107',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',

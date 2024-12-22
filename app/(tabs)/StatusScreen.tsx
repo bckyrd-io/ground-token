@@ -50,7 +50,6 @@ export default function StatusScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Status Monitoring</Text>
       <FlatList
         data={statuses}
         keyExtractor={(item) => item.id.toString()}

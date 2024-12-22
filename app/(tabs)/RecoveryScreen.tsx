@@ -27,7 +27,6 @@ export default function PasswordRecoveryScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Password Recovery</Text>
 
       <TextInput
         style={styles.input}
@@ -87,7 +86,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   link: {
-    color: '#4CAF50',
+    color: '#FFC107',
     marginTop: 12,
     textDecorationLine: 'underline',
     fontSize: 14,

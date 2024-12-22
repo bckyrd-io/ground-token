@@ -92,7 +92,7 @@ export default function PlaygroundScreen(): JSX.Element {
   const getBadgeColor = (status: string) => {
     switch (status) {
       case 'booked':
-        return '#4CAF50'; // Green for booked
+        return '#FFC107'; // Green for booked
       case 'reset':
         return '#757575'; // Gray for reset
       default:
@@ -102,7 +102,6 @@ export default function PlaygroundScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>{playground.name}</Text>
 
       <FlatList
         data={playground.activities}
@@ -172,27 +171,28 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   listContainer: {
-    paddingHorizontal: 10,
+    padding: 10,
   },
   card: {
-    flexDirection: 'column',
     backgroundColor: '#fff',
-    padding: 10,
     borderRadius: 8,
-    marginBottom: 10,
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 5,
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    overflow: 'hidden',
   },
   image: {
     width: '100%',
     height: 150,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
     marginBottom: 10,
+
   },
   cardContent: {
     flex: 1,
     justifyContent: 'flex-start',
+    padding:16,
   },
   activityName: {
     fontSize: 16,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   queueInfo: {
     fontSize: 14,
-    color: '#4CAF50',
+    color: '#FFC107',
     marginVertical: 5,
   },
   activityDetails: {

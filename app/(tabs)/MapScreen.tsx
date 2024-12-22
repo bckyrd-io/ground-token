@@ -137,19 +137,20 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#FFC107',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     backgroundColor: '#fff',
+
   },
   map: {
     width: screenWidth,
     height: screenHeight,
   },
   markerIcon: {
-    width: 30,
-    height: 30,
+    width: 100,
+    height: 100,
     resizeMode: 'contain',
   },
 });

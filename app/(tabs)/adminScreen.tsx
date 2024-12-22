@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ScrollView,
 } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
@@ -42,7 +41,6 @@ export default function AdminDashboard(): JSX.Element {
   ];
 
   const summaryData: SummaryItem[] = [
-    { label: 'Total Users', value: 150, color: '#2196F3' },
     { label: 'Active Users', value: 120, color: '#4CAF50' },
     { label: 'Total Revenue', value: '$12,500', color: '#FFC107' },
     { label: 'Pending Payments', value: 8, color: '#F44336' },

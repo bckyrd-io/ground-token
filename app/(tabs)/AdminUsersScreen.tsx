@@ -88,7 +88,6 @@ export default function AdminUsersScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Admin - User Management</Text>
 
       {/* Filters */}
       <View style={styles.filters}>

@@ -46,7 +46,6 @@ export default function PaymentScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Payment for Activity ID: {activityId}</Text>
 
       <Text style={styles.subHeader}>Select Payment Method</Text>
       {paymentMethods.map((method) => (
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   selectedPaymentMethod: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FFC107',
   },
   paymentMethodText: {
     color: '#fff',

@@ -4,7 +4,6 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 export default function LoginScreen({ navigation }: { navigation: any }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
       <TextInput style={styles.input} placeholder="Email/Username" placeholderTextColor="#888" />
       <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#888" />
       
@@ -60,7 +59,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   link: {
-    color: '#4CAF50',
+    color: '#FFC107',
     marginTop: 12,
     textDecorationLine: 'underline',
     fontSize: 14,
