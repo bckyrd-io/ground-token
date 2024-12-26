@@ -1,20 +1,56 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 
-export default function LoginScreen({ navigation }: { navigation: any }) {
+export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();  // Get the router instance
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://192.168.107.40:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Login successful');
+        router.push('/DashboardScreen');  // Use router.push to navigate
+      } else {
+        Alert.alert('Error', data.error || 'Login failed');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Network error');
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <TextInput style={styles.input} placeholder="Email/Username" placeholderTextColor="#888" />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#888" />
-      
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Dashboard')}>
+      <TextInput
+        style={styles.input}
+        placeholder="Email/Username"
+        placeholderTextColor="#888"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        placeholderTextColor="#888"
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
-
-      <Text style={styles.link} onPress={() => navigation.navigate('Register')}>
+      <Text style={styles.link} onPress={() => router.push('/RegisterScreen')}> {/* Use router.push for navigation */}
         Create an Account
       </Text>
-      <Text style={styles.link} onPress={() => navigation.navigate('PasswordRecovery')}>
+      <Text style={styles.link} onPress={() => router.push('/RecoveryScreen')}> {/* Use router.push */}
         Forgot Password?
       </Text>
     </View>
@@ -28,12 +64,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#f9f9f9',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
   },
   input: {
     width: '98%',
