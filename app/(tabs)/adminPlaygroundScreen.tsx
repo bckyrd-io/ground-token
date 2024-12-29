@@ -1,270 +1,306 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
+    View,
+    Text,
+    TextInput,
+    StyleSheet,
+    FlatList,
+    TouchableOpacity,
+    Alert,
+    ScrollView,
+    Image,
 } from 'react-native';
 import * as Location from 'expo-location';
+import * as ImagePicker from 'expo-image-picker';
 
 type Playground = {
-  id: string;
-  name: string;
-  description: string;
-  location: { latitude: string; longitude: string };
+    _id: string;
+    name: string;
+    description: string;
+    location: { latitude: string; longitude: string };
+    image?: string;
 };
 
 export default function AdminPlayground(): JSX.Element {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState({ latitude: '', longitude: '' });
-  const [playgrounds, setPlaygrounds] = useState<Playground[]>([]);
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [location, setLocation] = useState({ latitude: '', longitude: '' });
+    const [playgrounds, setPlaygrounds] = useState<Playground[]>([]);
+    const [image, setImage] = useState<string | null>(null);
+    const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
-  useEffect(() => {
-    // Mock playground data (simulating the mock JSON)
-    const mockPlaygrounds: Playground[] = [
-      {
-        id: '1',
-        name: 'City Park Playground',
-        description: 'A great place for kids to play and enjoy.',
-        location: { latitude: '40.748817', longitude: '-73.985428' },
-      },
-      {
-        id: '2',
-        name: 'Lakeside Playground',
-        description: 'Perfect for families with scenic lake views.',
-        location: { latitude: '34.052235', longitude: '-118.243683' },
-      },
-      {
-        id: '3',
-        name: 'Mountain View Playground',
-        description: 'Ideal for outdoor activities with a mountain backdrop.',
-        location: { latitude: '39.739235', longitude: '-104.990250' },
-      },
-    ];
+    useEffect(() => {
+        fetchPlaygrounds();
+    }, []);
 
-    setPlaygrounds(mockPlaygrounds);
-  }, []);
-
-  const fetchLocation = async () => {
-    try {
-      setIsFetchingLocation(true);
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location access is required to fetch coordinates.');
-        return;
-      }
-
-      const { coords } = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: coords.latitude.toFixed(6),
-        longitude: coords.longitude.toFixed(6),
-      });
-    } catch (error) {
-      Alert.alert('Error', 'Could not fetch location.');
-    } finally {
-      setIsFetchingLocation(false);
-    }
-  };
-
-  const handleAddPlayground = () => {
-    if (!name || !description || !location.latitude || !location.longitude) {
-      Alert.alert('Incomplete Data', 'Please fill all fields and fetch the GPS location.');
-      return;
-    }
-
-    const newPlayground: Playground = {
-      id: Date.now().toString(),
-      name,
-      description,
-      location,
+    const fetchPlaygrounds = async () => {
+        try {
+            const response = await fetch('http://192.168.12.40:5000/api/playgrounds');
+            const data = await response.json();
+            setPlaygrounds(data);
+        } catch (error) {
+            Alert.alert('Error', 'Failed to fetch playgrounds.');
+        }
     };
 
-    setPlaygrounds((prevPlaygrounds) => [...prevPlaygrounds, newPlayground]);
-
-    Alert.alert('Success', 'Playground added successfully!');
-    setName('');
-    setDescription('');
-    setLocation({ latitude: '', longitude: '' });
-  };
-
-  const handleDeletePlayground = (id: string) => {
-    setPlaygrounds((prevPlaygrounds) =>
-      prevPlaygrounds.filter((playground) => playground.id !== id)
-    );
-    Alert.alert('Deleted', 'Playground has been removed.');
-  };
-
-  const renderPlaygroundItem = ({ item }: { item: Playground }) => (
-    <View style={styles.playgroundItem}>
-      <Text style={styles.playgroundName}>{item.name}</Text>
-      <Text style={styles.playgroundDescription}>{item.description}</Text>
-      <Text style={styles.playgroundLocation}>
-        Latitude: {item.location.latitude}, Longitude: {item.location.longitude}
-      </Text>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDeletePlayground(item.id)}
-      >
-        <Text style={styles.deleteButtonText}>Delete</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  return (
-    <ScrollView style={styles.container}>
-
-      {/* Add Playground Form */}
-      <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Playground Name"
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Description"
-          value={description}
-          onChangeText={setDescription}
-        />
-        <View style={styles.locationContainer}>
-          <TouchableOpacity
-            style={styles.locationButton}
-            onPress={fetchLocation}
-            disabled={isFetchingLocation}
-          >
-            <Text style={styles.locationButtonText}>
-              {isFetchingLocation ? 'Fetching...' : 'Get GPS Location'}
-            </Text>
-          </TouchableOpacity>
-          {location.latitude && location.longitude && (
-            <Text style={styles.locationText}>
-              Latitude: {location.latitude}, Longitude: {location.longitude}
-            </Text>
-          )}
-        </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddPlayground}>
-          <Text style={styles.addButtonText}>Add Playground</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* List of Playgrounds */}
-      <Text style={styles.sectionTitle}>Playground Locations</Text>
-      <FlatList
-        data={playgrounds}
-        keyExtractor={(item) => item.id}
-        renderItem={renderPlaygroundItem}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No playgrounds added yet.</Text>
+    const fetchLocation = async () => {
+        try {
+            setIsFetchingLocation(true);
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Location access is required to fetch coordinates.');
+                return;
+            }
+            const { coords } = await Location.getCurrentPositionAsync({});
+            setLocation({
+                latitude: coords.latitude.toFixed(6),
+                longitude: coords.longitude.toFixed(6),
+            });
+        } catch (error) {
+            Alert.alert('Error', 'Could not fetch location.');
+        } finally {
+            setIsFetchingLocation(false);
         }
-      />
-    </ScrollView>
-  );
+    };
+
+    const pickImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1], // Ensure the image is cropped to a square
+            quality: 1,
+        });
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
+    };
+
+    const handleAddPlayground = async () => {
+        if (!name || !description || !location.latitude || !location.longitude || !image) {
+            Alert.alert('Incomplete Data', 'Please fill all fields, fetch GPS location, and add an image.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', description);
+        formData.append('latitude', location.latitude);
+        formData.append('longitude', location.longitude);
+
+        const file = {
+            uri: image,
+            name: `playground_${Date.now()}.jpg`,
+            type: 'image/jpeg',
+        };
+        formData.append('image', file as any);
+
+        try {
+            const response = await fetch('http://192.168.12.40:5000/api/playgrounds', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.ok) {
+                Alert.alert('Success', 'Playground added successfully!');
+                fetchPlaygrounds(); // Refresh data
+            } else {
+                const errorData = await response.json();
+                Alert.alert('Error', errorData.error || 'Failed to add playground.');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Network error. Please try again.');
+        }
+    };
+
+    const handleDeletePlayground = async (id: string) => {
+        try {
+            const response = await fetch(`http://192.168.12.40:5000/api/playgrounds/${id}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                Alert.alert('Deleted', 'Playground has been removed.');
+                fetchPlaygrounds(); // Refresh data
+            } else {
+                Alert.alert('Error', 'Failed to delete playground.');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Network error. Please try again.');
+        }
+    };
+
+    const renderPlaygroundItem = ({ item }: { item: Playground }) => (
+        <View style={styles.playgroundItem}>
+            <Text style={styles.playgroundName}>{item.name}</Text>
+            <Text style={styles.playgroundDescription}>{item.description}</Text>
+            <Text style={styles.playgroundLocation}>
+                Latitude: {item.location.latitude}, Longitude: {item.location.longitude}
+            </Text>
+            <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDeletePlayground(item._id)}
+            >
+                <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+        </View>
+    );
+
+    return (
+        <ScrollView style={styles.container}>
+            <View style={styles.formContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Playground Name"
+                    value={name}
+                    onChangeText={setName}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Description"
+                    value={description}
+                    onChangeText={setDescription}
+                />
+                {/* Image Picker */}
+                <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
+                    {image ? (
+                        <Image source={{ uri: image }} style={styles.previewImage} />
+                    ) : (
+                        <View style={styles.placeholderImage}>
+                            <Text style={styles.placeholderText}>Select Image</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
+
+                {/* Location Button */}
+                <TouchableOpacity
+                    style={styles.locationButton}
+                    onPress={fetchLocation}
+                    disabled={isFetchingLocation}
+                >
+                    <Text style={styles.locationButtonText}>
+                        {isFetchingLocation ? 'Fetching...' : location.latitude ? `${location.latitude}, ${location.longitude}` : 'Get GPS Location'}
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Add Playground Button */}
+                <TouchableOpacity style={styles.addButton} onPress={handleAddPlayground}>
+                    <Text style={styles.addButtonText}>Add Playground</Text>
+                </TouchableOpacity>
+            </View>
+            <FlatList
+                data={playgrounds}
+                keyExtractor={(item) => item._id}
+                renderItem={renderPlaygroundItem}
+                contentContainerStyle={styles.listContainer}
+            />
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9f9f9',
-    padding: 20,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  formContainer: {
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    fontSize: 16,
-  },
-  locationContainer: {
-    marginBottom: 10,
-  },
-  locationButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  locationButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  locationText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#424242',
-  },
-  addButton: {
-    backgroundColor: '#FFC107',
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  playgroundItem: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  playgroundName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  playgroundDescription: {
-    fontSize: 14,
-    marginVertical: 5,
-  },
-  playgroundLocation: {
-    fontSize: 14,
-    color: '#555',
-  },
-  deleteButton: {
-    marginTop: 10,
-    backgroundColor: '#f44336',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#757575',
-  },
+    imagePickerButton: {
+        width: '100%',
+        height: 150,
+        borderStyle: 'dotted',
+        borderWidth: 2,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f9f9f9',
+    },
+    placeholderImage: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100%',
+    },
+    placeholderText: {
+        fontSize: 16,
+        color: '#888',
+        textAlign: 'center',
+    },
+    previewImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 5,
+        resizeMode: 'cover',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: '#f9f9f9',
+        padding: 20,
+    },
+    formContainer: {
+        marginBottom: 20,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10,
+        fontSize: 16,
+    },
+    locationButton: {
+        borderColor: '#FFC107',
+        padding: 10,
+        borderRadius: 5,
+        borderWidth: 1,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    locationButtonText: {
+        color: '#000',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    addButton: {
+        backgroundColor: '#4CAF50',
+        padding: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    listContainer: {
+        paddingBottom: 20,
+    },
+    playgroundItem: {
+        backgroundColor: '#fff',
+        padding: 15,
+        borderRadius: 5,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    playgroundName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    playgroundDescription: {
+        fontSize: 14,
+        marginVertical: 5,
+    },
+    playgroundLocation: {
+        fontSize: 14,
+        color: '#555',
+    },
+    deleteButton: {
+        marginTop: 10,
+        backgroundColor: '#f44336',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    deleteButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
 });

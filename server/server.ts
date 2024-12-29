@@ -4,6 +4,9 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { Playground, User, Payment } from './schema'; // Import schema models
+import multer from 'multer';
+import path from 'path';
+
 
 // Initialize app
 const app = express();
@@ -68,18 +71,47 @@ app.get('/api/playgrounds', async (req, res) => {
     }
 });
 
-app.post('/api/playgrounds', async (req, res) => {
-    try {
-        const newPlayground = await Playground.create(req.body);
-        res.status(201).json(newPlayground);
-    } catch (err) {
-        if (err instanceof Error) {
-            res.status(400).json({ error: err.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error occurred' });
-        }
-    }
+
+
+
+
+// Configure Multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Store images in 'uploads/' directory
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
 });
+
+const upload = multer({ storage });
+
+// Handle playground creation with image upload
+app.post('/api/playgrounds', upload.single('image'), async (req, res) => {
+  try {
+    const { name, description, latitude, longitude } = req.body;
+
+    const newPlayground = await Playground.create({
+      name,
+      description,
+      location: { latitude, longitude },
+      image: req.file ? `/uploads/${req.file.filename}` : undefined, // Save image path
+    });
+
+    res.status(201).json(newPlayground);
+  } catch (err) {
+    if (err instanceof Error) {
+      res.status(400).json({ error: err.message });
+    } else {
+      res.status(400).json({ error: 'Unknown error occurred' });
+    }
+  }
+});
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 app.put('/api/playgrounds/:id', async (req, res) => {
     try {
