@@ -28,7 +28,7 @@ export default function RegisterScreen() {
     setFormData({ ...formData, [key]: value });
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match!');
       return;
@@ -37,10 +37,34 @@ export default function RegisterScreen() {
       alert('You must agree to the terms and conditions.');
       return;
     }
-    // Send formData to backend here
-    console.log('Registration Data:', formData);
-    router.push('/LoginScreen');
+  
+    try {
+      const response = await fetch('http://192.168.153.40:5000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          whatsapp: formData.whatsapp,
+          address: formData.address,
+          agreeToTerms: formData.agreeToTerms,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert('Registration successful!');
+        router.push('/LoginScreen'); // Redirect to login
+      } else {
+        alert(data.error || 'Registration failed.');
+      }
+    } catch (err) {
+      alert('Network error. Please try again.');
+    }
   };
+  
 
   return (
     <View style={styles.container}>

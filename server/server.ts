@@ -2,6 +2,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import mongoose from 'mongoose';
+import { Playground, User, Payment } from './schema'; // Import schema models
 
 // Initialize app
 const app = express();
@@ -11,93 +13,147 @@ const PORT = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cors());
 
-// Sample Data
-let playgrounds = [
-  {
-    id: '1',
-    name: 'City Park Playground',
-    description: 'A great place for kids to play and enjoy.',
-    location: { latitude: '40.748817', longitude: '-73.985428' },
-    activities: [
-      {
-        id: 'a1',
-        name: 'Trampoline',
-        description: 'Jumping fun!',
-        status: 'Available',
-        queue: 5,
-        price: 2.5,
-        maxTimeAllowed: 60,
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Lakeside Playground',
-    description: 'Perfect for families with scenic lake views.',
-    location: { latitude: '34.052235', longitude: '-118.243683' },
-    activities: [],
-  },
-];
+// MongoDB Connection
+mongoose.connect('mongodb://localhost:27017/db_ground_token');
 
-let users = [
-  { id: '1', name: 'John Doe', email: 'john@example.com', password: '1234', status: 'Active', pendingPayment: true },
-];
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+    console.log('Connected to MongoDB Database');
 
-let payments = [];
+    // Seed Sample Data
+    const seedData = async () => {
+        try {
+            const playgroundExists = await Playground.exists({ name: 'City Park Playground' });
+            if (!playgroundExists) {
+                await Playground.create({
+                    name: 'City Park Playground',
+                    description: 'A great place for kids to play and enjoy.',
+                    location: { latitude: '40.748817', longitude: '-73.985428' },
+                });
+                console.log('Sample Playground seeded successfully');
+            }
+
+            const userExists = await User.exists({ email: 'john@example.com' });
+            if (!userExists) {
+                await User.create({
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    password: '1234',
+                });
+                console.log('Sample User seeded successfully');
+            }
+        } catch (err) {
+            if (err instanceof Error) {
+                console.error('Failed to seed data:', err.message);
+            } else {
+                console.error('Failed to seed data:', err);
+            }
+        }
+    };
+    seedData();
+});
 
 // Playground Routes
-app.get('/api/playgrounds', (req, res) => {
-  res.json(playgrounds);
+app.get('/api/playgrounds', async (req, res) => {
+    try {
+        const playgrounds = await Playground.find();
+        res.json(playgrounds);
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'Unknown error occurred' });
+        }
+    }
 });
 
-app.post('/api/playgrounds', (req, res) => {
-  const newPlayground = { id: Date.now().toString(), ...req.body };
-  playgrounds.push(newPlayground);
-  res.status(201).json(newPlayground);
+app.post('/api/playgrounds', async (req, res) => {
+    try {
+        const newPlayground = await Playground.create(req.body);
+        res.status(201).json(newPlayground);
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(400).json({ error: 'Unknown error occurred' });
+        }
+    }
 });
 
-app.put('/api/playgrounds/:id', (req, res) => {
-  const { id } = req.params;
-  const index = playgrounds.findIndex((p) => p.id === id);
-  if (index !== -1) {
-    playgrounds[index] = { ...playgrounds[index], ...req.body };
-    res.json(playgrounds[index]);
-  } else {
-    res.status(404).json({ error: 'Playground not found' });
-  }
+app.put('/api/playgrounds/:id', async (req, res) => {
+    try {
+        const updatedPlayground = await Playground.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updatedPlayground);
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(400).json({ error: 'Unknown error occurred' });
+        }
+    }
 });
 
-app.delete('/api/playgrounds/:id', (req, res) => {
-  const { id } = req.params;
-  playgrounds = playgrounds.filter((p) => p.id !== id);
-  res.json({ message: 'Playground deleted successfully' });
+app.delete('/api/playgrounds/:id', async (req, res) => {
+    try {
+        await Playground.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Playground deleted successfully' });
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(400).json({ error: 'Unknown error occurred' });
+        }
+    }
 });
 
 // User Routes
-app.post('/api/register', (req, res) => {
-  const newUser = { id: Date.now().toString(), ...req.body };
-  users.push(newUser);
-  res.status(201).json(newUser);
+app.post('/api/register', async (req, res) => {
+    try {
+        const newUser = await User.create(req.body);
+        res.status(201).json(newUser);
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(400).json({ error: 'Unknown error occurred' });
+        }
+    }
 });
 
-app.post('/api/login', (req, res) => {
-  const { email, password } = req.body;
-  const user = users.find((u) => u.email === email && u.password === password);
-  if (user) {
-    res.json({ message: 'Login successful', user });
-  } else {
-    res.status(401).json({ error: 'Invalid credentials' });
-  }
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email, password });
+        if (user) {
+            res.json({ message: 'Login successful', user });
+        } else {
+            res.status(401).json({ error: 'Invalid credentials' });
+        }
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'Unknown error occurred' });
+        }
+    }
 });
 
 // Payment Routes
-app.post('/api/payments', (req, res) => {
-  const newPayment = { id: Date.now().toString(), ...req.body, timestamp: new Date() };
-  payments.push(newPayment);
-  res.status(201).json(newPayment);
+app.post('/api/payments', async (req, res) => {
+    try {
+        const newPayment = await Payment.create(req.body);
+        res.status(201).json(newPayment);
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(400).json({ error: 'Unknown error occurred' });
+        }
+    }
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });
