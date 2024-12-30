@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ScrollView,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList, ScrollView, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 
 // Types
@@ -49,8 +43,11 @@ export default function AdminDashboard(): JSX.Element {
   return (
     <ScrollView style={styles.container}>
       {/* Summary Cards */}
-      <View style={styles.summaryContainer}>
-        {summaryData.map((item) => (
+      <FlatList
+        data={summaryData}
+        horizontal
+        keyExtractor={(item) => item.label}
+        renderItem={({ item }) => (
           <View
             key={item.label}
             style={[styles.summaryCard, { backgroundColor: item.color }]}
@@ -58,8 +55,10 @@ export default function AdminDashboard(): JSX.Element {
             <Text style={styles.summaryValue}>{item.value}</Text>
             <Text style={styles.summaryLabel}>{item.label}</Text>
           </View>
-        ))}
-      </View>
+        )}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.summaryContainer}
+      />
 
       {/* Usage Data Graph */}
       <View style={styles.graphContainer}>
@@ -101,12 +100,13 @@ export default function AdminDashboard(): JSX.Element {
           }
         />
       </View>
-
     </ScrollView>
   );
 }
 
 // Styles
+const { width } = Dimensions.get('window'); // Get the screen width
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -120,25 +120,25 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 20,
     marginTop: 20,
   },
   summaryCard: {
-    flex: 1,
-    padding: 15,
+    width: width * 0.7, // Make the card width 70% of the screen width
+    height: 150, // Adjust the height to make the card look better
+    padding: 20,
     borderRadius: 8,
-    marginHorizontal: 5,
+    marginHorizontal: 10, // Add margin to separate cards
     alignItems: 'center',
+    justifyContent: 'center',
   },
   summaryValue: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
   },
   summaryLabel: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#fff',
   },
   graphContainer: {

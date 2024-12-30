@@ -29,6 +29,7 @@ export default function TabLayout() {
                 tabBarActiveTintColor: activeTintColor, // Set active tint color for icons
             }}
         >
+             
             {/* Home Tab (Always visible) */}
             <Tabs.Screen
                 name="index"
@@ -95,7 +96,7 @@ export default function TabLayout() {
                 }}
             />
 
-            {/* Dashboard Tab (Always visible) */}
+            {/* {/* Dashboard Tab (Always visible) */}
             <Tabs.Screen
                 name="DashboardScreen"
                 options={{
@@ -104,7 +105,7 @@ export default function TabLayout() {
                         <Ionicons name="stats-chart" size={28} color={color} />
                     ),
                 }}
-            />
+            /> 
 
             {/* Status Tab (Always visible) */}
             <Tabs.Screen

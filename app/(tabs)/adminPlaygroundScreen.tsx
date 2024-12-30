@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     },
     playgroundItem: {
         backgroundColor: '#fff',
-        padding: 15,
+        padding: 10,
         borderRadius: 5,
         marginBottom: 10,
         borderWidth: 1,

@@ -7,10 +7,12 @@ import {
     Dimensions,
     ScrollView,
     Image,
+    FlatList,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
-const screenWidth = Dimensions.get('window').width;
+// Styles
+const { width } = Dimensions.get('window'); // Get the screen width
 
 type Profile = {
     username: string;
@@ -46,6 +48,7 @@ export default function DashboardScreen(): JSX.Element {
         <ScrollView contentContainerStyle={styles.container}>
 
 
+
             {/* Action Section */}
             <TouchableOpacity style={styles.actionSection} onPress={() => router.push('/MapScreen')}>
                 <Image
@@ -54,30 +57,32 @@ export default function DashboardScreen(): JSX.Element {
                     resizeMode="cover"
                 />
                 <Text style={styles.actionTitle}>Explore Maps</Text>
-                <Text style={styles.actionDescription}>
-                    Discover play areas and plan your visits.
-                </Text>
+                <Text style={styles.actionDescription}>Discover play areas and plan your visits.</Text>
             </TouchableOpacity>
 
-            {/* Analytics Section */}
-            <View style={styles.analyticsContainer}>
-                <TouchableOpacity
-                    style={[styles.analyticsItem, { backgroundColor: '#28a745' }]} // Green background
-                    onPress={() => router.push('/PlaygroundScreen')}
-                >
-                    <Text style={styles.analyticsTitle}>Playground</Text>
-                    <Text style={styles.analyticsCount}>{dashboardData.analytics[0].count}</Text>
-                </TouchableOpacity>
+            {/* Analytics Section with FlatList */}
 
-                <TouchableOpacity
-                    style={[styles.analyticsItem, { backgroundColor: '#f1c40f' }]} // Yellow background
-                    onPress={() => router.push('/StatusScreen')}
-                >
-                    <Text style={styles.analyticsTitle}>Activity</Text>
-                    <Text style={styles.analyticsCount}>{dashboardData.analytics[1].count}</Text>
-                </TouchableOpacity>
+            <FlatList
+                data={dashboardData.analytics}
+                horizontal
+                keyExtractor={(item) => item.route}
+                renderItem={({ item }) => (
+                    <TouchableOpacity
+                        key={item.title}
+                        style={[styles.summaryCard, , { backgroundColor: item.route === 'playground' ? '#28a745' : '#f1c40f' }]}
+                        onPress={() => router.push(`/PlaygroundScreen`)}
+                    >
 
-            </View>
+                        <Text style={styles.summaryValue}>{item.count}</Text>
+                        <Text style={styles.summaryLabel}>{item.title}</Text>
+
+                    </TouchableOpacity>
+                )}
+
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.summaryContainer}
+            />
+
 
             {/* Profile Section */}
             <View style={styles.profileSection}>
@@ -96,10 +101,9 @@ export default function DashboardScreen(): JSX.Element {
             <View style={styles.notifications}>
                 <Text style={styles.notificationsTitle}>Latest Updates</Text>
                 <Text style={styles.notificationText}>2 PlayUnits under maintenance.</Text>
-                <Text style={styles.notificationText}>
-                    New PlayUnits coming soon to your area!
-                </Text>
+                <Text style={styles.notificationText}>New PlayUnits coming soon to your area!</Text>
             </View>
+
         </ScrollView>
     );
 }
@@ -112,22 +116,22 @@ const styles = StyleSheet.create({
     },
     profileSection: {
         flexDirection: 'row',
-        marginBottom: 24,
+        marginBottom: 10,
     },
     profileView: {
         flexDirection: 'column',
         padding: 16,
     },
     avatar: {
-        width: 100,
-        height: 100,
+        width: 60,
+        height: 60,
         borderRadius: 50,
-        marginBottom: 12,
+        marginBottom: 10,
         borderWidth: 1,
         borderColor: '#ccc',
     },
     welcomeText: {
-        fontSize: 18,
+        fontSize: 16,
         color: '#333',
     },
     usernameText: {
@@ -160,31 +164,8 @@ const styles = StyleSheet.create({
         padding: 16,
         paddingTop: 8,
     },
-    analyticsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 24,
-    },
-    analyticsItem: {
-        padding: 15,
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        width: screenWidth / 2 - 24,
-        alignItems: 'center',
-    },
-    analyticsTitle: {
-        fontSize: 16,
-        color: '#fff',
-        marginBottom: 8,
-    },
-    analyticsCount: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
+
+
     notifications: {
         padding: 15,
         backgroundColor: '#fff',
@@ -203,5 +184,34 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#555',
         marginBottom: 4,
+    },
+   
+    emptyText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: '#757575',
+    },
+
+    summaryContainer: {
+        marginBottom: 20,
+        marginTop: 20,
+      },
+    summaryCard: {
+        width: width * 0.7, // Make the card width 70% of the screen width
+        height: 150, // Adjust the height to make the card look better
+        padding: 20,
+        borderRadius: 8,
+        marginHorizontal: 10, // Add margin to separate cards
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    summaryValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    summaryLabel: {
+        fontSize: 16,
+        color: '#fff',
     },
 });
