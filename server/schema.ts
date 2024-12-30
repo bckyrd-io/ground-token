@@ -5,16 +5,18 @@ interface IPlayground extends Document {
   name: string;
   description: string;
   location: { latitude: string; longitude: string };
+  image: string;
 }
 
 const PlaygroundSchema = new Schema<IPlayground>({
-  name: { type: String, required: true },
-  description: { type: String },
-  location: {
-    latitude: { type: String, required: true },
-    longitude: { type: String, required: true },
-  },
-});
+    name: { type: String, required: true },
+    description: { type: String },
+    location: {
+      latitude: { type: String, required: true },
+      longitude: { type: String, required: true },
+    },
+    image: { type: String }, // Add this field for storing image paths
+  });  
 
 export const Playground = mongoose.model<IPlayground>('Playground', PlaygroundSchema);
 

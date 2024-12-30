@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
       },
     summaryCard: {
-        width: width * 0.7, // Make the card width 70% of the screen width
+        width: width * 0.6, // Make the card width 70% of the screen width
         height: 150, // Adjust the height to make the card look better
         padding: 20,
         borderRadius: 8,
