@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, TextInput, StyleSheet, Dimensions, Alert, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 
@@ -7,7 +7,7 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 // Base URL for API
-const BASE_URL = 'http://192.168.12.40:5000'; // Replace with current IP address
+const BASE_URL = 'http://192.168.71.40:5000'; // Replace with current IP address
 
 // Types
 interface Playground {
@@ -42,7 +42,7 @@ export default function OverviewScreen(): JSX.Element {
                         latitude: Number(playground.location.latitude),
                         longitude: Number(playground.location.longitude),
                     },
-                    image: `${BASE_URL}${playground.image}` // Use server image
+                    image: `${BASE_URL}${playground.image}` // Use server image directly
                 }));
 
                 console.log('Parsed playgrounds:', parsedData);
@@ -114,9 +114,15 @@ export default function OverviewScreen(): JSX.Element {
                         }}
                         title={playground.name}
                         description={`${playground.status || 'Available'} - ${playground.itemsAvailable || 0} items available`}
-                        onCalloutPress={() => router.push(`/activity-list/${playground._id}`)}
-                        image={{ uri: playground.image }}
-                    />
+                    >
+                        {/* Custom Marker Image */}
+                        {playground.image && (
+                            <Image
+                                source={{ uri: playground.image }}
+                                style={{ width: 100, height: 100, resizeMode: 'contain' }}
+                            />
+                        )}
+                    </Marker>
                 ))}
             </MapView>
         </View>
@@ -151,10 +157,5 @@ const styles = StyleSheet.create({
     map: {
         width: screenWidth,
         height: screenHeight,
-    },
-    markerIcon: {
-        width: 30, // Reduced marker size
-        height: 30, // Reduced marker size
-        resizeMode: 'cover',
     },
 });

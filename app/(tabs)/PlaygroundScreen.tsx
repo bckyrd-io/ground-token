@@ -1,256 +1,228 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+
+// Base URL for API
+const BASE_URL = 'http://192.168.71.40:5000'; // Replace with your current IP address
 
 // Types
-interface Activity {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  currentQueue: number;
-  bookingPrice: number; // Price per minute
-  maxTimeAllowed: number; // In minutes
-  status: 'Available' | 'Occupied';
-  location: string;
-}
-
-interface PlaygroundDetail {
-  id: string;
-  name: string;
-  activities: Activity[];
+interface Playground {
+    _id: string;
+    name: string;
+    description: string;
+    image: string;
+    location: { latitude: string; longitude: string };
+    status: 'Available' | 'Occupied';
+    bookingPrice: number;
 }
 
 interface ActivityStatus {
-  [key: string]: { status: string; position: number }; // Track status and position for each activity
+    [key: string]: { status: string; position: number };
 }
 
-// Sample Data
-const playgroundDetails: PlaygroundDetail[] = [
-  {
-    id: '1',
-    name: 'Central Park Playground',
-    activities: [
-      {
-        id: 'a1',
-        name: 'Trampoline',
-        description: 'Enjoy an exhilarating jump session on our trampoline.',
-        image: 'https://picsum.photos/200/300.jpg',
-        currentQueue: 5,
-        bookingPrice: 2.5,
-        maxTimeAllowed: 60,
-        status: 'Available',
-        location: 'Central Park, NYC',
-      },
-      {
-        id: 'a2',
-        name: 'Slide',
-        description: 'Slide down the tallest slide for a thrilling experience.',
-        image: 'https://picsum.photos/200/300.jpg',
-        currentQueue: 3,
-        bookingPrice: 1.5,
-        maxTimeAllowed: 30,
-        status: 'Occupied',
-        location: 'Central Park, NYC',
-      },
-    ],
-  },
-];
-
 export default function PlaygroundScreen(): JSX.Element {
-  const router = useRouter();
+    const router = useRouter();
+    const { playgroundId } = useLocalSearchParams(); // Capture playground ID if passed
+    const [playground, setPlayground] = useState<Playground | null>(null);
+    const [activityStatus, setActivityStatus] = useState<ActivityStatus>({});
 
-  const playground = playgroundDetails.find((item) => item.id === '1');
+    // Fetch playground details from API
+    useEffect(() => {
+        const fetchPlayground = async () => {
+            try {
+                console.log('Fetching playground details...');
+                const endpoint = playgroundId
+                    ? `${BASE_URL}/api/playgrounds/${playgroundId}` // Fetch specific playground
+                    : `${BASE_URL}/api/playgrounds`; // Fetch all playgrounds if no ID
 
-  // State to track user booking status per activity
-  const [activityStatus, setActivityStatus] = useState<ActivityStatus>({});
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                console.log('Fetched playground:', data);
 
-  if (!playground) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Playground not found</Text>
-      </View>
-    );
-  }
+                setPlayground(playgroundId ? data : data[0]); // Default to the first playground if no ID
+            } catch (error) {
+                console.error('Error fetching playground:', error);
+                Alert.alert('Error', 'Failed to load playground details.');
+            }
+        };
 
-  const handleBookActivity = (activity: Activity) => {
-    const nextPosition = activity.currentQueue + 1;
-    setActivityStatus((prev) => ({
-      ...prev,
-      [activity.id]: { status: 'booked', position: nextPosition },
-    }));
-    router.push(`/payment?activityId=${activity.id}`);
-  };
+        fetchPlayground();
+    }, [playgroundId]);
 
-  const resetStatus = (activityId: string) => {
-    setActivityStatus((prev) => ({
-      ...prev,
-      [activityId]: { status: 'reset', position: 0 },
-    }));
-  };
+    const handleBookActivity = (playground: Playground) => {
+        const nextPosition = 1; // Placeholder for the queue position
+        setActivityStatus((prev) => ({
+            ...prev,
+            [playground._id]: { status: 'booked', position: nextPosition },
+        }));
+        router.push(`/paymentScreen?playgroundId=${playground._id}`);
+    };
 
-  const getBadgeColor = (status: string) => {
-    switch (status) {
-      case 'booked':
-        return '#FFC107'; // Green for booked
-      case 'reset':
-        return '#757575'; // Gray for reset
-      default:
-        return '#E0E0E0'; // Default gray
-    }
-  };
+    const resetStatus = (playgroundId: string) => {
+        // Reset the status back to "Available" and remove the position
+        setActivityStatus((prev) => ({
+            ...prev,
+            [playgroundId]: { status: 'Available', position: 0 },
+        }));
+    };
 
-  return (
-    <View style={styles.container}>
+    const getBadgeColor = (status: string) => {
+        switch (status) {
+            case 'booked':
+                return '#FFC107'; // Yellow for booked
+            case 'reset':
+                return '#757575'; // Grey for reset
+            default:
+                return '#E0E0E0'; // Default color
+        }
+    };
 
-      <FlatList
-        data={playground.activities}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          const status = activityStatus[item.id];
-          return (
-            <View style={styles.card}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <View style={styles.cardContent}>
-                <Text style={styles.activityName}>{item.name}</Text>
-                <Text style={styles.activityDescription}>{item.description}</Text>
-                <Text style={styles.queueInfo}>Current Queue: {item.currentQueue}</Text>
-                <Text style={styles.activityDetails}>
-                  Price: ${item.bookingPrice}/min | Max Time: {item.maxTimeAllowed} mins
-                </Text>
-                <Text style={styles.activityDetails}>Status: {item.status}</Text>
-                <Text style={styles.activityDetails}>Location: {item.location}</Text>
-                {status ? (
-                  <View
-                    style={[
-                      styles.badge,
-                      { backgroundColor: getBadgeColor(status.status) },
-                    ]}
-                  >
-                    <Text style={styles.badgeText}>
-                      {status.status === 'booked'
-                        ? `Position: ${status.position}`
-                        : 'Status Reset'}
-                    </Text>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.bookButton}
-                    onPress={() => handleBookActivity(item)}
-                  >
-                    <Text style={styles.bookButtonText}>Book Now</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-              {status && status.status === 'booked' && (
-                <TouchableOpacity
-                  style={styles.resetButton}
-                  onPress={() => resetStatus(item.id)}
-                >
-                  <Text style={styles.resetButtonText}>Reset</Text>
-                </TouchableOpacity>
-              )}
+    if (!playground) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.errorText}>Loading playground details...</Text>
             </View>
-          );
-        }}
-        contentContainerStyle={styles.listContainer}
-      />
-    </View>
-  );
+        );
+    }
+
+    return (
+        <View style={styles.container}>
+            <FlatList
+                data={[playground]} // Only showing one playground here
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => {
+                    const status = activityStatus[item._id];
+                    return (
+                        <View style={styles.card}>
+                            <Image source={{ uri: `${BASE_URL}${item.image}` }} style={styles.image} />
+                            <View style={styles.cardContent}>
+                                <Text style={styles.activityName}>{item.name}</Text>
+                                <Text style={styles.activityDescription}>{item.description}</Text>
+                                <Text style={styles.activityDetails}>Booking Price: ${item.bookingPrice}</Text>
+                                <Text style={styles.activityDetails}>Status: {item.status}</Text>
+                                <Text style={styles.activityDetails}>
+                                    Location: {item.location.latitude}, {item.location.longitude}
+                                </Text>
+                                {status && status.status === 'booked' ? (
+                                    <View
+                                        style={[styles.badge, { backgroundColor: getBadgeColor(status.status) }]}>
+                                        <Text style={styles.badgeText}>
+                                            {status.status === 'booked'
+                                                ? `Position: ${status.position}`
+                                                : 'Status Reset'}
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <TouchableOpacity
+                                        style={styles.bookButton}
+                                        onPress={() => handleBookActivity(item)}>
+                                        <Text style={styles.bookButtonText}>Book Now</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            {status && status.status === 'booked' && (
+                                <View style={styles.resetContainer}>
+                                    <TouchableOpacity
+                                        style={styles.resetButton}
+                                        onPress={() => resetStatus(item._id)}>
+                                        <Text style={styles.resetButtonText}>Reset</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                    );
+                }}
+                contentContainerStyle={styles.listContainer}
+            />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9f9f9',
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  listContainer: {
-    padding: 10,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginBottom: 5,
-    marginTop: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    overflow: 'hidden',
-  },
-  image: {
-    width: '100%',
-    height: 150,
-    resizeMode: 'cover',
-    marginBottom: 10,
-
-  },
-  cardContent: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    padding:16,
-  },
-  activityName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  activityDescription: {
-    fontSize: 14,
-    color: '#757575',
-  },
-  queueInfo: {
-    fontSize: 14,
-    color: '#FFC107',
-    marginVertical: 5,
-  },
-  activityDetails: {
-    fontSize: 14,
-    color: '#424242',
-    marginVertical: 2,
-  },
-  badge: {
-    marginTop: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  bookButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 5,
-    alignSelf: 'flex-start',
-  },
-  bookButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  resetButton: {
-    backgroundColor: '#f44336',
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 5,
-    alignSelf: 'flex-start',
-    marginTop: 10,
-  },
-  resetButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#f44336',
-    textAlign: 'center',
-    marginTop: 20,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#f9f9f9',
+    },
+    listContainer: {
+        padding: 10,
+    },
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        marginBottom: 5,
+        marginTop: 5,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        overflow: 'hidden',
+    },
+    image: {
+        width: '100%',
+        height: 150,
+        resizeMode: 'cover',
+        marginBottom: 10,
+    },
+    cardContent: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        padding: 16,
+    },
+    activityName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    activityDescription: {
+        fontSize: 14,
+        color: '#757575',
+    },
+    activityDetails: {
+        fontSize: 14,
+        color: '#424242',
+        marginVertical: 2,
+    },
+    badge: {
+        marginTop: 10,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+    },
+    badgeText: {
+        color: '#fff',
+        fontSize: 14,
+    },
+    bookButton: {
+        backgroundColor: '#4CAF50',
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        borderRadius: 5,
+        alignSelf: 'flex-start',
+    },
+    bookButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    resetContainer: {
+        marginTop: 10,
+        paddingHorizontal: 16,
+        marginBottom: 10,
+    },
+    resetButton: {
+        backgroundColor: '#f44336',
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        borderRadius: 5,
+        alignSelf: 'flex-start',
+    },
+    resetButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    errorText: {
+        fontSize: 16,
+        color: '#f44336',
+        textAlign: 'center',
+        marginTop: 20,
+    },
 });

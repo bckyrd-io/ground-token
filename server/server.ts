@@ -30,10 +30,14 @@ db.once('open', () => {
             const playgroundExists = await Playground.exists({ name: 'City Park Playground' });
             if (!playgroundExists) {
                 await Playground.create({
-                    name: 'City Park Playground',
+                    name: 'trampoline',
                     description: 'A great place for kids to play and enjoy.',
                     location: { latitude: '40.748817', longitude: '-73.985428' },
+                    image: '/uploads/sample-playground.jpg', // Replace with your image path
+                    bookingPrice: 10.0, // Added booking price
+                    status: 'Available', // Added status
                 });
+                
                 console.log('Sample Playground seeded successfully');
             }
 
