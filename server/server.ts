@@ -6,7 +6,6 @@ import mongoose from 'mongoose';
 import { Playground, User, Payment } from './schema'; // Import schema models
 import multer from 'multer';
 import path from 'path';
-import { Request, Response } from 'express';
 
 
 // Initialize app
@@ -229,33 +228,6 @@ app.post('/api/payments/book/:id', async (req, res) => {
         }
     }
 });
-
-
-
-
-app.put('/api/payments/:paymentId/complete', async (req: Request<{ paymentId: string }>, res: Response) => {
-    try {
-        const { paymentId } = req.params;
-
-        // Find the payment by ID
-        const payment = await Payment.findById(paymentId);
-
-        // Ensure the payment is found
-        if (!payment) {
-            return res.status(404).json({ error: 'Payment not found' });
-        }
-
-        // If payment is found, update the status to 'Paid'
-        payment.status = 'Paid';
-        await payment.save();
-
-        // Return the updated payment object
-        res.json({ message: 'Payment completed successfully', payment });
-    } catch (err: any) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
 
 
 app.listen(PORT, () => {
