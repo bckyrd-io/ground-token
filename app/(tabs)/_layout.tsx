@@ -12,7 +12,7 @@ export default function TabLayout() {
     const colorScheme = useColorScheme();
 
     // Define a primary green color, or adapt it from Colors
-    const activeTintColor = Colors[colorScheme ?? 'dark'].tint || '#34D399'; // Green color (adjust to your theme)
+    const activeTintColor = Colors[colorScheme ?? 'light'].tint || '#34D399'; // Green color (adjust to your theme)
 
     return (
         <Tabs
@@ -74,6 +74,18 @@ export default function TabLayout() {
                 }}
             />
 
+            {/* {/* Dashboard Tab (Always visible) */}
+            <Tabs.Screen
+                name="DashboardScreen"
+                options={{
+                    title: 'Dashboard',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="home" size={28} color={color} />
+                    ),
+                }}
+            /> 
+
+
             {/* Map Tab (Always visible) */}
             <Tabs.Screen
                 name="MapScreen"
@@ -96,28 +108,6 @@ export default function TabLayout() {
                 }}
             />
 
-            {/* {/* Dashboard Tab (Always visible) */}
-            <Tabs.Screen
-                name="DashboardScreen"
-                options={{
-                    title: 'Dashboard',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="stats-chart" size={28} color={color} />
-                    ),
-                }}
-            /> 
-
-            {/* Status Tab (Always visible) */}
-            <Tabs.Screen
-                name="StatusScreen"
-                options={{
-                    title: 'Status',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="document-text" size={28} color={color} />
-                    ),
-                }}
-            />
-
             {/* Payment Tab (Always visible) */}
             <Tabs.Screen
                 name="PaymentScreen"
@@ -135,7 +125,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Admin',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="shield-checkmark" size={28} color={color} />
+                        <Ionicons name="stats-chart" size={28} color={color} />
                     ),
                 }}
             />

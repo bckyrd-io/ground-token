@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 // Base URL for API
-const BASE_URL = 'http://192.168.71.40:5000'; // Replace with your current IP address
+const BASE_URL = 'http://192.168.162.40:5000'; // Replace with your current IP address
 
 // Types
 interface Playground {
@@ -22,9 +22,10 @@ interface ActivityStatus {
 
 export default function PlaygroundScreen(): JSX.Element {
     const router = useRouter();
-    const { playgroundId } = useLocalSearchParams(); // Capture playground ID if passed
+    const { playgroundId, paymentStatus } = useLocalSearchParams(); // Capture payment status if passed
     const [playground, setPlayground] = useState<Playground | null>(null);
     const [activityStatus, setActivityStatus] = useState<ActivityStatus>({});
+    const [hasPaymentUpdated, setHasPaymentUpdated] = useState(false); // Flag to check if payment was updated
 
     // Fetch playground details from API
     useEffect(() => {
@@ -49,13 +50,33 @@ export default function PlaygroundScreen(): JSX.Element {
         fetchPlayground();
     }, [playgroundId]);
 
+    // Update the playground status if payment is successful and payment hasn't been updated
+    useEffect(() => {
+        if (paymentStatus === 'Paid' && playground && !hasPaymentUpdated) {
+            setPlayground((prevPlayground) => (prevPlayground
+                ? { ...prevPlayground, status: 'Occupied' }
+                : prevPlayground
+            ));
+            setActivityStatus((prev) => ({
+                ...prev,
+                [Array.isArray(playgroundId) ? playgroundId[0] : playgroundId]: { status: 'Paid', position: 1 },
+            }));
+            
+            setHasPaymentUpdated(true); // Set the flag to true to prevent further updates
+        }
+    }, [paymentStatus, playgroundId, playground, hasPaymentUpdated]);
+
     const handleBookActivity = (playground: Playground) => {
         const nextPosition = 1; // Placeholder for the queue position
         setActivityStatus((prev) => ({
             ...prev,
             [playground._id]: { status: 'booked', position: nextPosition },
         }));
-        router.push(`/paymentScreen?playgroundId=${playground._id}`);
+        // Fixed routing for sending playgroundId
+        router.push({
+            pathname: '/PaymentScreen',
+            params: { playgroundId: playground._id }, // Correct parameter passing
+        });
     };
 
     const resetStatus = (playgroundId: string) => {
@@ -72,6 +93,8 @@ export default function PlaygroundScreen(): JSX.Element {
                 return '#FFC107'; // Yellow for booked
             case 'reset':
                 return '#757575'; // Grey for reset
+            case 'Paid':
+                return '#4CAF50'; // Green for Paid
             default:
                 return '#E0E0E0'; // Default color
         }
@@ -105,7 +128,7 @@ export default function PlaygroundScreen(): JSX.Element {
                                 </Text>
                                 {status && status.status === 'booked' ? (
                                     <View
-                                        style={[styles.badge, { backgroundColor: getBadgeColor(status.status) }]}>
+                                        style={[styles.badge, { backgroundColor: getBadgeColor(status.status) }]} >
                                         <Text style={styles.badgeText}>
                                             {status.status === 'booked'
                                                 ? `Position: ${status.position}`
@@ -115,7 +138,7 @@ export default function PlaygroundScreen(): JSX.Element {
                                 ) : (
                                     <TouchableOpacity
                                         style={styles.bookButton}
-                                        onPress={() => handleBookActivity(item)}>
+                                        onPress={() => handleBookActivity(item)} >
                                         <Text style={styles.bookButtonText}>Book Now</Text>
                                     </TouchableOpacity>
                                 )}
@@ -125,7 +148,7 @@ export default function PlaygroundScreen(): JSX.Element {
                                 <View style={styles.resetContainer}>
                                     <TouchableOpacity
                                         style={styles.resetButton}
-                                        onPress={() => resetStatus(item._id)}>
+                                        onPress={() => resetStatus(item._id)} >
                                         <Text style={styles.resetButtonText}>Reset</Text>
                                     </TouchableOpacity>
                                 </View>

@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import { Playground, User, Payment } from './schema'; // Import schema models
 import multer from 'multer';
 import path from 'path';
+import { Request, Response } from 'express';
 
 
 // Initialize app
@@ -37,7 +38,7 @@ db.once('open', () => {
                     bookingPrice: 10.0, // Added booking price
                     status: 'Available', // Added status
                 });
-                
+
                 console.log('Sample Playground seeded successfully');
             }
 
@@ -81,36 +82,36 @@ app.get('/api/playgrounds', async (req, res) => {
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Store images in 'uploads/' directory
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Store images in 'uploads/' directory
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    },
 });
 
 const upload = multer({ storage });
 
 // Handle playground creation with image upload
 app.post('/api/playgrounds', upload.single('image'), async (req, res) => {
-  try {
-    const { name, description, latitude, longitude } = req.body;
+    try {
+        const { name, description, latitude, longitude } = req.body;
 
-    const newPlayground = await Playground.create({
-      name,
-      description,
-      location: { latitude, longitude },
-      image: req.file ? `/uploads/${req.file.filename}` : undefined, // Save image path
-    });
+        const newPlayground = await Playground.create({
+            name,
+            description,
+            location: { latitude, longitude },
+            image: req.file ? `/uploads/${req.file.filename}` : undefined, // Save image path
+        });
 
-    res.status(201).json(newPlayground);
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(400).json({ error: err.message });
-    } else {
-      res.status(400).json({ error: 'Unknown error occurred' });
+        res.status(201).json(newPlayground);
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(400).json({ error: 'Unknown error occurred' });
+        }
     }
-  }
 });
 
 // Serve uploaded files statically
@@ -142,6 +143,25 @@ app.delete('/api/playgrounds/:id', async (req, res) => {
         }
     }
 });
+
+app.get('/api/playgrounds/:id', async (req, res) => {
+    try {
+        const playground = await Playground.findById(req.params.id);
+        if (!playground) {
+            res.status(404).json({ error: 'Playground not found' });
+            return;
+        }
+        res.json(playground);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+}
+);
+
+
+
+
+
 
 // User Routes
 app.post('/api/register', async (req, res) => {
@@ -176,10 +196,31 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Payment Routes
-app.post('/api/payments', async (req, res) => {
+
+
+app.post('/api/payments/book/:id', async (req, res) => {
     try {
-        const newPayment = await Payment.create(req.body);
-        res.status(201).json(newPayment);
+        const { method, amount, status } = req.body;
+
+        // Validate playground ID
+        const playground = await Playground.findById(req.params.id);
+        if (!playground) {
+            res.status(404).json({ error: 'Playground not found' });
+            return; // Ensure the function ends here
+        }
+
+        // Create payment record
+        const newPayment = await Payment.create({
+            method,
+            amount,
+            status: status || 'Pending',
+        });
+
+        // Update playground status
+        playground.status = 'Occupied';
+        await playground.save();
+
+        res.status(201).json({ payment: newPayment, playground });
     } catch (err) {
         if (err instanceof Error) {
             res.status(400).json({ error: err.message });
@@ -189,7 +230,34 @@ app.post('/api/payments', async (req, res) => {
     }
 });
 
-// Start Server
+
+
+
+app.put('/api/payments/:paymentId/complete', async (req: Request<{ paymentId: string }>, res: Response) => {
+    try {
+        const { paymentId } = req.params;
+
+        // Find the payment by ID
+        const payment = await Payment.findById(paymentId);
+
+        // Ensure the payment is found
+        if (!payment) {
+            return res.status(404).json({ error: 'Payment not found' });
+        }
+
+        // If payment is found, update the status to 'Paid'
+        payment.status = 'Paid';
+        await payment.save();
+
+        // Return the updated payment object
+        res.json({ message: 'Payment completed successfully', payment });
+    } catch (err: any) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
