@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     View,
     Text,
@@ -10,44 +10,83 @@ import {
     FlatList,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useStore } from '../store'; // Import Zustand Store
 
-// Styles
-const { width } = Dimensions.get('window'); // Get the screen width
-
-type Profile = {
+// Define types for the profile and data
+interface Profile {
     username: string;
     avatar: string;
-};
+}
 
-type AnalyticsItem = {
-    title: string;
-    count: number;
+interface Notification {
+    id: string;
+    message: string;
+}
+
+interface AnalyticsItem {
     route: string;
-};
+    count: number;
+    title: string;
+}
 
-type DashboardData = {
-    profile: Profile;
-    analytics: AnalyticsItem[];
-};
+// Styles and Dimensions
+const { width } = Dimensions.get('window');
 
-const dashboardData: DashboardData = {
-    profile: {
-        username: 'JohnDoe',
-        avatar: 'https://picsum.photos/200',
-    },
-    analytics: [
-        { title: 'Playgrounds', count: 5, route: 'playground' },
-        { title: 'Activities', count: 12, route: 'activities' },
-    ],
-};
-
+// Dashboard Component
 export default function DashboardScreen(): JSX.Element {
     const router = useRouter();
+    const {
+        profile,
+        fetchProfile,
+    } = useStore();
+
+    const [notifications, setNotifications] = React.useState<Notification[]>([]);
+    const [analytics, setAnalytics] = React.useState<AnalyticsItem[]>([]);
+
+    // Fetch data on mount
+    useEffect(() => {
+        fetchProfile(); // Fetch profile data from store
+
+        const fetchNotifications = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/notifications');
+                const data = await response.json();
+                console.log('Fetched notifications:', data);
+                setNotifications(data);
+            } catch (error) {
+                console.error('Failed to fetch notifications:', error);
+            }
+        };
+
+        const fetchAnalytics = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/analytics');
+                const data = await response.json();
+                console.log('Fetched analytics:', data);
+                setAnalytics(data);
+            } catch (error) {
+                console.error('Failed to fetch analytics:', error);
+            }
+        };
+
+        fetchNotifications();
+        fetchAnalytics();
+    }, []);
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-
-
+            {/* Profile Section */}
+            <View style={styles.profileSection}>
+                <Image
+                    source={{ uri: profile?.avatar }}
+                    style={styles.avatar}
+                    resizeMode="cover"
+                />
+                <View style={styles.profileView}>
+                    <Text style={styles.welcomeText}>Welcome,</Text>
+                    <Text style={styles.usernameText}>{profile?.username}</Text>
+                </View>
+            </View>
 
             {/* Action Section */}
             <TouchableOpacity style={styles.actionSection} onPress={() => router.push('/MapScreen')}>
@@ -60,54 +99,49 @@ export default function DashboardScreen(): JSX.Element {
                 <Text style={styles.actionDescription}>Discover play areas and plan your visits.</Text>
             </TouchableOpacity>
 
-            {/* Analytics Section with FlatList */}
-
+            {/* Analytics Section */}
             <FlatList
-                data={dashboardData.analytics}
+                data={analytics}
                 horizontal
                 keyExtractor={(item) => item.route}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        key={item.title}
-                        style={[styles.summaryCard, , { backgroundColor: item.route === 'playground' ? '#28a745' : '#f1c40f' }]}
+                        style={[
+                            styles.summaryCard,
+                            { backgroundColor: item.route === 'playground' ? '#28a745' : '#f1c40f' },
+                        ]}
                         onPress={() => router.push(`/PlaygroundScreen`)}
                     >
-
                         <Text style={styles.summaryValue}>{item.count}</Text>
                         <Text style={styles.summaryLabel}>{item.title}</Text>
-
                     </TouchableOpacity>
                 )}
-
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.summaryContainer}
             />
 
-
-            {/* Profile Section */}
-            <View style={styles.profileSection}>
-                <Image
-                    source={{ uri: dashboardData.profile.avatar }}
-                    style={styles.avatar}
-                    resizeMode="cover"
-                />
-                <View style={styles.profileView}>
-                    <Text style={styles.welcomeText}>Welcome,</Text>
-                    <Text style={styles.usernameText}>{dashboardData.profile.username}</Text>
-                </View>
-            </View>
-
             {/* Notifications Section */}
             <View style={styles.notifications}>
                 <Text style={styles.notificationsTitle}>Latest Updates</Text>
-                <Text style={styles.notificationText}>2 PlayUnits under maintenance.</Text>
-                <Text style={styles.notificationText}>New PlayUnits coming soon to your area!</Text>
+                {notifications.length > 0 ? (
+                    <FlatList
+                        data={notifications}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <View style={styles.notificationItem}>
+                                <Text style={styles.notificationText}>{item.message}</Text>
+                            </View>
+                        )}
+                    />
+                ) : (
+                    <Text style={styles.emptyText}>No notifications available</Text>
+                )}
             </View>
-
         </ScrollView>
     );
 }
 
+// Styles
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
@@ -126,9 +160,6 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 50,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
     },
     welcomeText: {
         fontSize: 16,
@@ -145,7 +176,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         borderWidth: 1,
         borderColor: '#ccc',
-        overflow: 'hidden',
     },
     actionImage: {
         width: '100%',
@@ -164,13 +194,10 @@ const styles = StyleSheet.create({
         padding: 16,
         paddingTop: 8,
     },
-
-
     notifications: {
         padding: 15,
         backgroundColor: '#fff',
         borderRadius: 8,
-        marginBottom: 10,
         borderWidth: 1,
         borderColor: '#ccc',
     },
@@ -180,28 +207,28 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         marginBottom: 8,
     },
+    notificationItem: {
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 10,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
     notificationText: {
         fontSize: 14,
-        color: '#555',
-        marginBottom: 4,
+        color: '#333',
     },
-   
-    emptyText: {
-        textAlign: 'center',
-        fontSize: 16,
-        color: '#757575',
-    },
-
     summaryContainer: {
         marginBottom: 20,
         marginTop: 20,
-      },
+    },
     summaryCard: {
-        width: width * 0.6, // Make the card width 70% of the screen width
-        height: 150, // Adjust the height to make the card look better
+        width: width * 0.6,
+        height: 150,
         padding: 20,
         borderRadius: 8,
-        marginHorizontal: 10, // Add margin to separate cards
+        marginHorizontal: 10,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -213,5 +240,10 @@ const styles = StyleSheet.create({
     summaryLabel: {
         fontSize: 16,
         color: '#fff',
+    },
+    emptyText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: '#757575',
     },
 });

@@ -1,12 +1,10 @@
-// server.ts
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import { Playground, User, Payment } from './schema'; // Import schema models
+import { Playground, User, Payment, Notification } from './schema'; // Import Notification schema
 import multer from 'multer';
 import path from 'path';
-
 
 // Initialize app
 const app = express();
@@ -75,10 +73,6 @@ app.get('/api/playgrounds', async (req, res) => {
     }
 });
 
-
-
-
-
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -115,7 +109,6 @@ app.post('/api/playgrounds', upload.single('image'), async (req, res) => {
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 
 app.put('/api/playgrounds/:id', async (req, res) => {
     try {
@@ -154,13 +147,7 @@ app.get('/api/playgrounds/:id', async (req, res) => {
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
-}
-);
-
-
-
-
-
+});
 
 // User Routes
 app.post('/api/register', async (req, res) => {
@@ -194,9 +181,39 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+
+
+
+// Profile Route with Generics
+app.get('/api/profile/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Find the user by ID
+        const user = await User.findById(userId);
+
+        // If user is not found, send a 404 response
+        // if (!user) {
+        //     return res.status(404).json({ error: 'User not found' });
+        // }
+
+        // Return user data as JSON
+        res.json(user);
+    } catch (err) {
+        if (err instanceof Error) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'Unknown error occurred' });
+        }
+    }
+});
+
+
+
+
+
+
 // Payment Routes
-
-
 app.post('/api/payments/book/:id', async (req, res) => {
     try {
         const { method, amount, status } = req.body;
@@ -229,6 +246,59 @@ app.post('/api/payments/book/:id', async (req, res) => {
     }
 });
 
+// Notification Routes
+app.get('/api/notifications/:userId/unread', async (req, res) => {
+    try {
+        const unreadNotifications = await Notification.find({
+            userId: req.params.userId,
+            read: false,
+        });
+        res.json(unreadNotifications);
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'Unknown error occurred' });
+        }
+    }
+});
+
+app.put('/api/notifications/:userId/mark-all-read', async (req, res) => {
+    try {
+        await Notification.updateMany({ userId: req.params.userId }, { read: true });
+        res.json({ message: 'All notifications marked as read' });
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'Unknown error occurred' });
+        }
+    }
+});
+
+// Analytics Routes
+app.get('/api/analytics', async (req, res) => {
+    try {
+        const playgrounds = await Playground.find();
+        const availableCount = playgrounds.filter((p) => p.status === 'Available').length;
+        const occupiedCount = playgrounds.filter((p) => p.status === 'Occupied').length;
+
+        const payments = await Payment.find();
+        const totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0);
+
+        res.json([
+            { title: 'Available Playgrounds', count: availableCount, route: 'playgrounds' },
+            { title: 'Occupied Playgrounds', count: occupiedCount, route: 'occupied' },
+            { title: 'Total Revenue', count: totalRevenue, route: 'payments' },
+        ]);
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'Unknown error occurred' });
+        }
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

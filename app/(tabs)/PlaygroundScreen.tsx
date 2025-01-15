@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 // Base URL for API
-const BASE_URL = 'http://192.168.162.40:5000'; // Replace with your current IP address
+const BASE_URL = 'http://192.168.167.40:5000'; // Replace with your current IP address
 
 // Types
 interface Playground {

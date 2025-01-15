@@ -3,24 +3,24 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 // Playground Schema
 interface IPlayground extends Document {
-  name: string;
-  description: string;
-  location: { latitude: string; longitude: string };
-  image: string;
-  bookingPrice: number; // Added booking price field
-  status: 'Available' | 'Occupied'; // Added status field
+    name: string;
+    description: string;
+    location: { latitude: string; longitude: string };
+    image: string;
+    bookingPrice: number; // Added booking price field
+    status: 'Available' | 'Occupied'; // Added status field
 }
 
 const PlaygroundSchema = new Schema<IPlayground>({
-  name: { type: String, required: true },
-  description: { type: String },
-  location: {
-    latitude: { type: String, required: true },
-    longitude: { type: String, required: true },
-  },
-  image: { type: String },
-  bookingPrice: { type: Number, required: true }, // Ensure this field is populated
-  status: { type: String, enum: ['Available', 'Occupied'], default: 'Available' }, // Ensure this field is populated
+    name: { type: String, required: true },
+    description: { type: String },
+    location: {
+        latitude: { type: String, required: true },
+        longitude: { type: String, required: true },
+    },
+    image: { type: String },
+    bookingPrice: { type: Number, required: true }, // Ensure this field is populated
+    status: { type: String, enum: ['Available', 'Occupied'], default: 'Available' }, // Ensure this field is populated
 });
 
 export const Playground = mongoose.model<IPlayground>('Playground', PlaygroundSchema);
@@ -63,3 +63,23 @@ const PaymentSchema = new Schema<IPayment>({
 });
 
 export const Payment = mongoose.model<IPayment>('Payment', PaymentSchema);
+
+// Notification Schema
+interface INotification extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    message: string;
+    type: 'info' | 'warning' | 'alert'; // Notification types
+    timestamp: Date;
+    read: boolean;
+}
+
+const NotificationSchema = new Schema<INotification>({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message: { type: String, required: true },
+    type: { type: String, enum: ['info', 'warning', 'alert'], default: 'info' },
+    timestamp: { type: Date, default: Date.now },
+    read: { type: Boolean, default: false },
+});
+
+export const Notification = mongoose.model<INotification>('Notification', NotificationSchema);
+

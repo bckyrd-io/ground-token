@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'reac
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 // Base URL for API
-const BASE_URL = 'http://192.168.162.40:5000'; // Replace with your current IP address
+const BASE_URL = 'http://192.168.167.40:5000'; // Replace with your current IP address
 
 // Payment Methods
 const paymentMethods = [
@@ -90,104 +90,58 @@ export default function PaymentScreen(): JSX.Element {
     };
 
 
-    //   const handlePayment = async () => {
-    //     if (!selectedMethod) {
-    //         Alert.alert('Error', 'Please select a payment method');
-    //         return;
-    //     }
-
-    //     if (selectedMethod === '1' && cardNumber === '') {
-    //         Alert.alert('Error', 'Please enter your card details');
-    //         return;
-    //     }
-
-    //     if (selectedMethod === '2' && walletBalance < playground.bookingPrice) {
-    //         Alert.alert('Error', 'Insufficient wallet balance');
-    //         return;
-    //     }
-
-    //     try {
-    //         const paymentData = {
-    //             method: paymentMethods.find((m) => m.id === selectedMethod)?.name,
-    //             amount: playground.bookingPrice,
-    //             status: 'Completed',
-    //         };
-
-    //         console.log('Booking playground...', `${BASE_URL}/api/payments/book/${playgroundId}`);
-    //         const response = await fetch(`${BASE_URL}/api/payments/book/${playgroundId}`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify(paymentData),
-    //         });
-
-    //         const result = await response.json();
-
-    //         if (response.ok) {
-    //             Alert.alert('Payment Successful', 'Playground booked successfully!');
-    //             router.push('/StatusScreen'); // Redirect to status page or confirmation screen
-    //         } else {
-    //             Alert.alert('Payment Failed', result.error || 'Failed to process payment.');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error processing payment:', error);
-    //         Alert.alert('Error', 'Failed to process payment.');
-    //     }
 
 
+    if (!playground) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.loadingText}>Loading playground details...</Text>
+            </View>
+        );
+    }
 
-
-
-
-if (!playground) {
     return (
         <View style={styles.container}>
-            <Text style={styles.loadingText}>Loading playground details...</Text>
+            <Text style={styles.header}>Payment for {playground.name}</Text>
+            <Text style={styles.subHeader}>Price: ${playground.bookingPrice}</Text>
+
+            <Text style={styles.subHeader}>Select Payment Method</Text>
+            {paymentMethods.map((method) => (
+                <TouchableOpacity
+                    key={method.id}
+                    style={[
+                        styles.paymentMethod,
+                        selectedMethod === method.id && styles.selectedPaymentMethod,
+                    ]}
+                    onPress={() => setSelectedMethod(method.id)}
+                >
+                    <Text style={styles.paymentMethodText}>{method.name}</Text>
+                </TouchableOpacity>
+            ))}
+
+            {selectedMethod === '1' && (
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Card Number"
+                    keyboardType="numeric"
+                    value={cardNumber}
+                    onChangeText={setCardNumber}
+                />
+            )}
+
+            {selectedMethod === '2' && (
+                <Text style={styles.walletInfo}>Wallet Balance: ${walletBalance}</Text>
+            )}
+
+            <TouchableOpacity style={styles.paymentButton} onPress={handlePayment}>
+                <Text style={styles.paymentButtonText}>Confirm Payment</Text>
+            </TouchableOpacity>
+
+            {offlineStatus && (
+                <Text style={styles.offlineStatus}>Waiting for Admin Confirmation...</Text>
+            )}
         </View>
     );
-}
-
-return (
-    <View style={styles.container}>
-        <Text style={styles.header}>Payment for {playground.name}</Text>
-        <Text style={styles.subHeader}>Price: ${playground.bookingPrice}</Text>
-
-        <Text style={styles.subHeader}>Select Payment Method</Text>
-        {paymentMethods.map((method) => (
-            <TouchableOpacity
-                key={method.id}
-                style={[
-                    styles.paymentMethod,
-                    selectedMethod === method.id && styles.selectedPaymentMethod,
-                ]}
-                onPress={() => setSelectedMethod(method.id)}
-            >
-                <Text style={styles.paymentMethodText}>{method.name}</Text>
-            </TouchableOpacity>
-        ))}
-
-        {selectedMethod === '1' && (
-            <TextInput
-                style={styles.input}
-                placeholder="Enter Card Number"
-                keyboardType="numeric"
-                value={cardNumber}
-                onChangeText={setCardNumber}
-            />
-        )}
-
-        {selectedMethod === '2' && (
-            <Text style={styles.walletInfo}>Wallet Balance: ${walletBalance}</Text>
-        )}
-
-        <TouchableOpacity style={styles.paymentButton} onPress={handlePayment}>
-            <Text style={styles.paymentButtonText}>Confirm Payment</Text>
-        </TouchableOpacity>
-
-        {offlineStatus && (
-            <Text style={styles.offlineStatus}>Waiting for Admin Confirmation...</Text>
-        )}
-    </View>
-);
 }
 
 const styles = StyleSheet.create({
